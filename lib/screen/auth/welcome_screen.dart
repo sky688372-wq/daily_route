@@ -23,7 +23,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const SizedBox(height: 20),
-          
+
                 // 1. 이미지
                 // todo: 나중에 더 좋은 이미지를 구하면 교체하기
                 SizedBox(
@@ -34,12 +34,16 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     fit: BoxFit.contain,
                   ),
                 ),
-          
+
                 const SizedBox(height: 16),
-          
+
                 // 2. 앱 로고와 이름
-                Image.asset('assets/logo/app_symbol.png', width: 88, height: 88),
-          
+                Image.asset(
+                  'assets/logo/app_symbol.png',
+                  width: 88,
+                  height: 88,
+                ),
+
                 const Text(
                   '데일리루트',
                   style: TextStyle(
@@ -48,17 +52,17 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-          
+
                 const SizedBox(height: 8),
-          
+
                 const Text(
                   '나에게 맞는 이동, 더 편안한 일상',
                   textAlign: TextAlign.center,
                   style: TextStyle(color: AppColor.textSecondary, fontSize: 16),
                 ),
-          
+
                 const SizedBox(height: 50),
-          
+
                 // 3. 로그인 버튼
                 SizedBox(
                   width: double.infinity,
@@ -82,13 +86,16 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     },
                     child: const Text(
                       '로그인',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
-          
+
                 const SizedBox(height: 12),
-          
+
                 // 4. 회원가입 버튼
                 SizedBox(
                   width: double.infinity,
@@ -112,11 +119,14 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     },
                     child: const Text(
                       '회원가입',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
-          
+
                 const SizedBox(height: 24),
               ],
             ),

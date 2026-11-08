@@ -95,9 +95,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       color: AppColor.textSecondary,
                     ),
                     hintText: '닉네임을 입력해 주세요',
-                    hintStyle: const TextStyle(
-                      color: AppColor.hint,
-                    ),
+                    hintStyle: const TextStyle(color: AppColor.hint),
                     filled: true,
                     fillColor: AppColor.inputBackground,
                     contentPadding: const EdgeInsets.symmetric(
@@ -106,9 +104,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: const BorderSide(
-                        color: AppColor.inputBorder,
-                      ),
+                      borderSide: const BorderSide(color: AppColor.inputBorder),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
@@ -151,9 +147,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       color: AppColor.textSecondary,
                     ),
                     hintText: '이메일을 입력해 주세요',
-                    hintStyle: const TextStyle(
-                      color: AppColor.hint,
-                    ),
+                    hintStyle: const TextStyle(color: AppColor.hint),
                     filled: true,
                     fillColor: AppColor.inputBackground,
                     contentPadding: const EdgeInsets.symmetric(
@@ -162,9 +156,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: const BorderSide(
-                        color: AppColor.inputBorder,
-                      ),
+                      borderSide: const BorderSide(color: AppColor.inputBorder),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
@@ -208,9 +200,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       color: AppColor.textSecondary,
                     ),
                     suffixIcon: IconButton(
-                      tooltip: _isPasswordShow
-                          ? '비밀번호 숨기기'
-                          : '비밀번호 표시',
+                      tooltip: _isPasswordShow ? '비밀번호 숨기기' : '비밀번호 표시',
                       onPressed: () {
                         setState(() {
                           _isPasswordShow = !_isPasswordShow;
@@ -224,9 +214,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       ),
                     ),
                     hintText: '비밀번호를 입력해 주세요',
-                    hintStyle: const TextStyle(
-                      color: AppColor.hint,
-                    ),
+                    hintStyle: const TextStyle(color: AppColor.hint),
                     filled: true,
                     fillColor: AppColor.inputBackground,
                     contentPadding: const EdgeInsets.symmetric(
@@ -235,9 +223,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: const BorderSide(
-                        color: AppColor.inputBorder,
-                      ),
+                      borderSide: const BorderSide(color: AppColor.inputBorder),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
@@ -281,13 +267,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       color: AppColor.textSecondary,
                     ),
                     suffixIcon: IconButton(
-                      tooltip: _isPasswordConfirmShow
-                          ? '비밀번호 숨기기'
-                          : '비밀번호 표시',
+                      tooltip: _isPasswordConfirmShow ? '비밀번호 숨기기' : '비밀번호 표시',
                       onPressed: () {
                         setState(() {
-                          _isPasswordConfirmShow =
-                          !_isPasswordConfirmShow;
+                          _isPasswordConfirmShow = !_isPasswordConfirmShow;
                         });
                       },
                       icon: Icon(
@@ -298,9 +281,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       ),
                     ),
                     hintText: '비밀번호를 한 번 더 입력해 주세요',
-                    hintStyle: const TextStyle(
-                      color: AppColor.hint,
-                    ),
+                    hintStyle: const TextStyle(color: AppColor.hint),
                     filled: true,
                     fillColor: AppColor.inputBackground,
                     contentPadding: const EdgeInsets.symmetric(
@@ -309,9 +290,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: const BorderSide(
-                        color: AppColor.inputBorder,
-                      ),
+                      borderSide: const BorderSide(color: AppColor.inputBorder),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
