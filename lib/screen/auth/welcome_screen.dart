@@ -1,4 +1,5 @@
 import 'package:daily_route/core/theme/app_color.dart';
+import 'package:daily_route/screen/auth/login_screen.dart';
 import 'package:flutter/material.dart';
 
 class WelcomeScreen extends StatefulWidget {
@@ -35,11 +36,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               const SizedBox(height: 16),
 
               // 2. 앱 로고와 이름
-              Image.asset(
-                'assets/logo/app_symbol.png',
-                width: 88,
-                height: 88,
-              ),
+              Image.asset('assets/logo/app_symbol.png', width: 88, height: 88),
 
               const Text(
                 '데일리루트',
@@ -55,10 +52,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               const Text(
                 '나에게 맞는 이동, 더 편안한 일상',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: AppColor.textSecondary,
-                  fontSize: 16,
-                ),
+                style: TextStyle(color: AppColor.textSecondary, fontSize: 16),
               ),
 
               const SizedBox(height: 50),
@@ -77,14 +71,16 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     ),
                   ),
                   onPressed: () {
-                    // todo: 이메일 로그인 화면으로 이동하기
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const LoginScreen(),
+                      ),
+                    );
                   },
                   child: const Text(
                     '로그인',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
@@ -99,9 +95,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   style: OutlinedButton.styleFrom(
                     backgroundColor: AppColor.surface,
                     foregroundColor: AppColor.primary,
-                    side: const BorderSide(
-                      color: AppColor.primary,
-                    ),
+                    side: const BorderSide(color: AppColor.primary),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -111,10 +105,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   },
                   child: const Text(
                     '회원가입',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
