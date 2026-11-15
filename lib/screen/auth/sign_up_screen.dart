@@ -1,4 +1,7 @@
+import 'package:daily_route/core/api_service/api_service.dart';
 import 'package:daily_route/core/theme/app_color.dart';
+import 'package:daily_route/core/util/app_snackBar.dart';
+import 'package:daily_route/screen/auth/login_screen.dart';
 import 'package:flutter/material.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -20,6 +23,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
   bool _isPasswordShow = false;
   bool _isPasswordConfirmShow = false;
 
+  // 회원가입 요청 중 여부
+  bool _isLoading = false;
+
   @override
   void dispose() {
     _nicknameCtrl.dispose();
@@ -27,6 +33,82 @@ class _SignUpScreenState extends State<SignUpScreen> {
     _passwordCtrl.dispose();
     _passwordConfirm.dispose();
     super.dispose();
+  }
+
+  // 회원가입 요청
+  Future<void> _trySignUp() async {
+    if (_isLoading) return;
+
+    FocusScope.of(context).unfocus();
+
+    final nickname = _nicknameCtrl.text.trim();
+    final email = _emailCtrl.text.trim();
+    final password = _passwordCtrl.text;
+    final passwordConfirm = _passwordConfirm.text;
+
+    // 1. 입력값 검사
+    if (nickname.isEmpty ||
+        email.isEmpty ||
+        password.isEmpty ||
+        passwordConfirm.isEmpty) {
+      AppSnackBar.show(context, '모든 항목을 입력해 주세요.');
+      return;
+    }
+
+    if (nickname.runes.length < 2 || nickname.runes.length > 20) {
+      AppSnackBar.show(context, '닉네임은 2~20자로 입력해 주세요.');
+      return;
+    }
+
+    if (!RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch(email)) {
+      AppSnackBar.show(context, '올바른 이메일 주소를 입력해 주세요.');
+      return;
+    }
+
+    if (password.runes.length < 8 || password.runes.length > 64) {
+      AppSnackBar.show(context, '비밀번호는 8~64자로 입력해 주세요.');
+      return;
+    }
+
+    if (password != passwordConfirm) {
+      AppSnackBar.show(context, '비밀번호가 일치하지 않습니다.');
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // 2. 회원가입 API 요청
+      final result = await ApiService.trySignUp(
+        nickname: nickname,
+        email: email,
+        password: password,
+      );
+
+      if (!mounted) return;
+
+      // 3. 응답 결과 처리
+      AppSnackBar.show(context, result.message);
+
+      if (result.success) {
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (!mounted) return;
+
+      AppSnackBar.show(
+        context,
+        '요청을 처리하지 못했습니다. 서버와 네트워크 연결을 확인해 주세요.',
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -95,7 +177,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       color: AppColor.textSecondary,
                     ),
                     hintText: '닉네임을 입력해 주세요',
-                    hintStyle: const TextStyle(color: AppColor.hint),
+                    hintStyle: const TextStyle(
+                      color: AppColor.hint,
+                    ),
                     filled: true,
                     fillColor: AppColor.inputBackground,
                     contentPadding: const EdgeInsets.symmetric(
@@ -104,7 +188,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: const BorderSide(color: AppColor.inputBorder),
+                      borderSide: const BorderSide(
+                        color: AppColor.inputBorder,
+                      ),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
@@ -147,7 +233,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       color: AppColor.textSecondary,
                     ),
                     hintText: '이메일을 입력해 주세요',
-                    hintStyle: const TextStyle(color: AppColor.hint),
+                    hintStyle: const TextStyle(
+                      color: AppColor.hint,
+                    ),
                     filled: true,
                     fillColor: AppColor.inputBackground,
                     contentPadding: const EdgeInsets.symmetric(
@@ -156,7 +244,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: const BorderSide(color: AppColor.inputBorder),
+                      borderSide: const BorderSide(
+                        color: AppColor.inputBorder,
+                      ),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
@@ -200,7 +290,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       color: AppColor.textSecondary,
                     ),
                     suffixIcon: IconButton(
-                      tooltip: _isPasswordShow ? '비밀번호 숨기기' : '비밀번호 표시',
+                      tooltip:
+                      _isPasswordShow ? '비밀번호 숨기기' : '비밀번호 표시',
                       onPressed: () {
                         setState(() {
                           _isPasswordShow = !_isPasswordShow;
@@ -214,7 +305,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       ),
                     ),
                     hintText: '비밀번호를 입력해 주세요',
-                    hintStyle: const TextStyle(color: AppColor.hint),
+                    hintStyle: const TextStyle(
+                      color: AppColor.hint,
+                    ),
                     filled: true,
                     fillColor: AppColor.inputBackground,
                     contentPadding: const EdgeInsets.symmetric(
@@ -223,7 +316,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: const BorderSide(color: AppColor.inputBorder),
+                      borderSide: const BorderSide(
+                        color: AppColor.inputBorder,
+                      ),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
@@ -267,10 +362,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       color: AppColor.textSecondary,
                     ),
                     suffixIcon: IconButton(
-                      tooltip: _isPasswordConfirmShow ? '비밀번호 숨기기' : '비밀번호 표시',
+                      tooltip: _isPasswordConfirmShow
+                          ? '비밀번호 숨기기'
+                          : '비밀번호 표시',
                       onPressed: () {
                         setState(() {
-                          _isPasswordConfirmShow = !_isPasswordConfirmShow;
+                          _isPasswordConfirmShow =
+                          !_isPasswordConfirmShow;
                         });
                       },
                       icon: Icon(
@@ -281,7 +379,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       ),
                     ),
                     hintText: '비밀번호를 한 번 더 입력해 주세요',
-                    hintStyle: const TextStyle(color: AppColor.hint),
+                    hintStyle: const TextStyle(
+                      color: AppColor.hint,
+                    ),
                     filled: true,
                     fillColor: AppColor.inputBackground,
                     contentPadding: const EdgeInsets.symmetric(
@@ -290,7 +390,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: const BorderSide(color: AppColor.inputBorder),
+                      borderSide: const BorderSide(
+                        color: AppColor.inputBorder,
+                      ),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
@@ -309,13 +411,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   width: double.infinity,
                   height: 56,
                   child: ElevatedButton(
-                    onPressed: () {
-                      FocusScope.of(context).unfocus();
-
-                      // todo: 입력값 검사하기
-                      // todo: 회원가입 API 연결하기
-                      // todo: 회원가입 성공 후 화면 이동하기
-                    },
+                    onPressed: _isLoading ? null : _trySignUp,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColor.inputFocusedBorder,
                       foregroundColor: Colors.white,
@@ -328,11 +424,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    child: const Text('회원가입'),
+                    child: Text(
+                      _isLoading ? '가입 중...' : '회원가입',
+                    ),
                   ),
                 ),
 
-                const SizedBox(height: 24),
+                const SizedBox(height: 40),
               ],
             ),
           ),

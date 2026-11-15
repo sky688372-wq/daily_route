@@ -1,4 +1,5 @@
 import 'package:daily_route/screen/auth/welcome_screen.dart';
+import 'package:daily_route/test_screen.dart';
 import 'package:flutter/material.dart';
 
 void main() {
