@@ -1,4 +1,5 @@
 import 'package:daily_route/core/theme/app_color.dart';
+import 'package:daily_route/screen/auth/forgot_password_screen.dart';
 import 'package:flutter/material.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -88,9 +89,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       color: AppColor.textSecondary,
                     ),
                     hintText: '이메일을 입력해 주세요',
-                    hintStyle: const TextStyle(
-                      color: AppColor.hint,
-                    ),
+                    hintStyle: const TextStyle(color: AppColor.hint),
                     filled: true,
                     fillColor: AppColor.inputBackground,
                     contentPadding: const EdgeInsets.symmetric(
@@ -99,9 +98,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: const BorderSide(
-                        color: AppColor.inputBorder,
-                      ),
+                      borderSide: const BorderSide(color: AppColor.inputBorder),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
@@ -145,9 +142,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       color: AppColor.textSecondary,
                     ),
                     suffixIcon: IconButton(
-                      tooltip: _obscurePassword
-                          ? '비밀번호 표시'
-                          : '비밀번호 숨기기',
+                      tooltip: _obscurePassword ? '비밀번호 표시' : '비밀번호 숨기기',
                       onPressed: () {
                         setState(() {
                           _obscurePassword = !_obscurePassword;
@@ -161,9 +156,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                     hintText: '비밀번호를 입력해 주세요',
-                    hintStyle: const TextStyle(
-                      color: AppColor.hint,
-                    ),
+                    hintStyle: const TextStyle(color: AppColor.hint),
                     filled: true,
                     fillColor: AppColor.inputBackground,
                     contentPadding: const EdgeInsets.symmetric(
@@ -172,9 +165,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: const BorderSide(
-                        color: AppColor.inputBorder,
-                      ),
+                      borderSide: const BorderSide(color: AppColor.inputBorder),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
@@ -235,7 +226,12 @@ class _LoginScreenState extends State<LoginScreen> {
                         foregroundColor: AppColor.primary,
                       ),
                       onPressed: () {
-                        // todo: 비밀번호 찾기 화면으로 이동하기
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const ForgotPasswordScreen(),
+                          ),
+                        );
                       },
                       child: const Text(
                         '비밀번호 찾기',
