@@ -3,7 +3,7 @@ import 'package:daily_route/core/theme/app_color.dart';
 import 'package:daily_route/core/util/app_snackBar.dart';
 import 'package:daily_route/core/util/token_storage.dart';
 import 'package:daily_route/screen/auth/forgot_password_screen.dart';
-import 'package:daily_route/screen/main/home_screen.dart';
+import 'package:daily_route/screen/main/main_screen.dart';
 import 'package:flutter/material.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -84,10 +84,7 @@ class _LoginScreenState extends State<LoginScreen> {
       } catch (e) {
         if (!mounted) return;
 
-        AppSnackBar.show(
-          context,
-          '로그인 정보를 저장하지 못했습니다. 다시 시도해 주세요.',
-        );
+        AppSnackBar.show(context, '로그인 정보를 저장하지 못했습니다. 다시 시도해 주세요.');
         return;
       }
 
@@ -97,14 +94,13 @@ class _LoginScreenState extends State<LoginScreen> {
 
       // 6. 홈 화면 이동
       Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (context) => HomeScreen()));
+        context,
+        MaterialPageRoute(builder: (context) => MainScreen()),
+      );
     } catch (e) {
       if (!mounted) return;
 
-      AppSnackBar.show(
-        context,
-        '요청을 처리하지 못했습니다. 서버와 네트워크 연결을 확인해 주세요.',
-      );
+      AppSnackBar.show(context, '요청을 처리하지 못했습니다. 서버와 네트워크 연결을 확인해 주세요.');
     } finally {
       if (mounted) {
         setState(() {
@@ -180,9 +176,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       color: AppColor.textSecondary,
                     ),
                     hintText: '이메일을 입력해 주세요',
-                    hintStyle: const TextStyle(
-                      color: AppColor.hint,
-                    ),
+                    hintStyle: const TextStyle(color: AppColor.hint),
                     filled: true,
                     fillColor: AppColor.inputBackground,
                     contentPadding: const EdgeInsets.symmetric(
@@ -191,9 +185,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: const BorderSide(
-                        color: AppColor.inputBorder,
-                      ),
+                      borderSide: const BorderSide(color: AppColor.inputBorder),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
@@ -240,8 +232,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       color: AppColor.textSecondary,
                     ),
                     suffixIcon: IconButton(
-                      tooltip:
-                      _obscurePassword ? '비밀번호 표시' : '비밀번호 숨기기',
+                      tooltip: _obscurePassword ? '비밀번호 표시' : '비밀번호 숨기기',
                       onPressed: () {
                         setState(() {
                           _obscurePassword = !_obscurePassword;
@@ -255,9 +246,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                     hintText: '비밀번호를 입력해 주세요',
-                    hintStyle: const TextStyle(
-                      color: AppColor.hint,
-                    ),
+                    hintStyle: const TextStyle(color: AppColor.hint),
                     filled: true,
                     fillColor: AppColor.inputBackground,
                     contentPadding: const EdgeInsets.symmetric(
@@ -266,9 +255,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: const BorderSide(
-                        color: AppColor.inputBorder,
-                      ),
+                      borderSide: const BorderSide(color: AppColor.inputBorder),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
@@ -327,8 +314,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) =>
-                            const ForgotPasswordScreen(),
+                            builder: (context) => const ForgotPasswordScreen(),
                           ),
                         );
                       },
