@@ -1,5 +1,6 @@
 import 'package:daily_route/core/theme/app_color.dart';
 import 'package:daily_route/screen/main/home/home_screen.dart';
+import 'package:daily_route/screen/main/my/my_screen.dart';
 import 'package:flutter/material.dart';
 
 class MainScreen extends StatefulWidget {
@@ -33,8 +34,7 @@ class _MainScreenState extends State<MainScreen> {
             Center(child: Text('이용내역 화면')),
 
             // 4. 내 정보 화면
-            // todo: 내 정보 화면 구현 후 교체
-            Center(child: Text('내 정보 화면')),
+            MyScreen()
           ],
         ),
       ),

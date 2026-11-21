@@ -1,10 +1,13 @@
 import 'package:daily_route/core/api_service/api_service.dart';
+import 'package:daily_route/core/providers/user_provider.dart';
 import 'package:daily_route/core/theme/app_color.dart';
 import 'package:daily_route/core/util/app_snackBar.dart';
 import 'package:daily_route/core/util/token_storage.dart';
 import 'package:daily_route/screen/auth/forgot_password_screen.dart';
 import 'package:daily_route/screen/main/main_screen.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -14,14 +17,12 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  // 입력 컨트롤러
+  // 1. 입력 컨트롤러
   final TextEditingController _emailCtrl = TextEditingController();
   final TextEditingController _passwordCtrl = TextEditingController();
 
-  // 비밀번호 숨김 여부
+  // 2. 비밀번호 숨김 여부 및 로그인 요청 상태
   bool _obscurePassword = true;
-
-  // 로그인 요청 중 여부
   bool _isLoading = false;
 
   @override
@@ -31,7 +32,7 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  // 로그인 요청
+  // 3. 로그인 요청
   Future<void> _tryLogin() async {
     if (_isLoading) return;
 
@@ -40,7 +41,6 @@ class _LoginScreenState extends State<LoginScreen> {
     final email = _emailCtrl.text.trim();
     final password = _passwordCtrl.text;
 
-    // 1. 입력값 검사
     if (email.isEmpty || password.isEmpty) {
       AppSnackBar.show(context, '이메일과 비밀번호를 입력해 주세요.');
       return;
@@ -56,21 +56,31 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      // 2. 로그인 API 요청
+      // 4. 로그인 API 요청
+      // 반환 형태: LoginResponse
       final result = await ApiService.tryLogin(
         email: email,
         password: password,
       );
 
+      // 토큰·비밀번호·사용자 개인정보는 콘솔에 출력하지 않음
+      if (kDebugMode) {
+        debugPrint('========== 로그인 응답 확인 ==========');
+        debugPrint('[로그인] 성공 여부: ${result.success}');
+        debugPrint('[로그인] data 타입: ${result.data.runtimeType}');
+        debugPrint('[로그인] data 존재 여부: ${result.data != null}');
+        debugPrint('====================================');
+      }
+
       if (!mounted) return;
 
-      // 3. 로그인 실패 안내
+      // 5. 로그인 실패 안내
       if (!result.success) {
         AppSnackBar.show(context, result.message);
         return;
       }
 
-      // 4. 토큰 정보 확인
+      // LoginUser.fromJson()은 LoginData.fromJson() 내부에서 이미 호출됨
       final loginData = result.data;
 
       if (loginData == null || loginData.accessToken.isEmpty) {
@@ -78,29 +88,40 @@ class _LoginScreenState extends State<LoginScreen> {
         return;
       }
 
-      // 5. 토큰 저장
+      // 6. 토큰은 기존 저장소에만 저장
       try {
         await TokenStorage.saveToken(loginData.accessToken);
       } catch (e) {
         if (!mounted) return;
 
-        AppSnackBar.show(context, '로그인 정보를 저장하지 못했습니다. 다시 시도해 주세요.');
+        AppSnackBar.show(
+          context,
+          '로그인 정보를 저장하지 못했습니다. 다시 시도해 주세요.',
+        );
         return;
       }
 
       if (!mounted) return;
 
+      // 7. 토큰을 제외한 LoginUser 객체만 Provider에 저장
+      context.read<UserProvider>().setUser(loginData.user);
+
       AppSnackBar.show(context, result.message);
 
-      // 6. 홈 화면 이동
+      // 8. 메인 화면 이동
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => MainScreen()),
+        MaterialPageRoute(
+          builder: (context) => const MainScreen(),
+        ),
       );
     } catch (e) {
       if (!mounted) return;
 
-      AppSnackBar.show(context, '요청을 처리하지 못했습니다. 서버와 네트워크 연결을 확인해 주세요.');
+      AppSnackBar.show(
+        context,
+        '요청을 처리하지 못했습니다. 서버와 네트워크 연결을 확인해 주세요.',
+      );
     } finally {
       if (mounted) {
         setState(() {
@@ -113,16 +134,13 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // 뒤로 가기용 앱바
       appBar: AppBar(
         backgroundColor: AppColor.background,
         foregroundColor: AppColor.textPrimary,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
       ),
-
       backgroundColor: AppColor.background,
-
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -144,10 +162,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     height: 1.4,
                   ),
                 ),
-
                 const SizedBox(height: 36),
 
-                // 2. 이메일 입력 텍스트 필드
+                // 2. 이메일 입력
                 const Padding(
                   padding: EdgeInsets.only(bottom: 8),
                   child: Text(
@@ -159,7 +176,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                 ),
-
                 TextField(
                   keyboardType: TextInputType.emailAddress,
                   textInputAction: TextInputAction.next,
@@ -185,7 +201,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: const BorderSide(color: AppColor.inputBorder),
+                      borderSide: const BorderSide(
+                        color: AppColor.inputBorder,
+                      ),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
@@ -196,10 +214,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 24),
 
-                // 3. 비밀번호 입력 텍스트 필드
+                // 3. 비밀번호 입력
                 const Padding(
                   padding: EdgeInsets.only(bottom: 8),
                   child: Text(
@@ -211,7 +228,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                 ),
-
                 TextField(
                   keyboardType: TextInputType.visiblePassword,
                   textInputAction: TextInputAction.done,
@@ -255,7 +271,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: const BorderSide(color: AppColor.inputBorder),
+                      borderSide: const BorderSide(
+                        color: AppColor.inputBorder,
+                      ),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
@@ -266,7 +284,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 32),
 
                 // 4. 로그인 버튼
@@ -292,7 +309,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 24),
 
                 // 5. 비밀번호 찾기 화면 이동
@@ -314,7 +330,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const ForgotPasswordScreen(),
+                            builder: (context) =>
+                            const ForgotPasswordScreen(),
                           ),
                         );
                       },
@@ -328,7 +345,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ],
                 ),
-
                 const SizedBox(height: 24),
               ],
             ),
