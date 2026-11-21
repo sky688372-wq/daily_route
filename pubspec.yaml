@@ -39,6 +39,7 @@ dependencies:
   kakao_maps_flutter: ^0.2.2
   provider: ^6.1.5+1
   url_launcher: ^6.3.3
+  package_info_plus: ^10.2.2
 
 dev_dependencies:
   flutter_test:

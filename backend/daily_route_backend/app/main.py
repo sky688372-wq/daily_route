@@ -97,6 +97,20 @@ class LoginInput(EmailInput):
     password: str = Field(min_length=1, max_length=64)
 
 
+class ProfileInput(BaseModel):
+    nickname: str = Field(min_length=2, max_length=20)
+
+    @field_validator('nickname', mode='before')
+    @classmethod
+    def normalize_nickname(cls, value):
+        return value.strip() if isinstance(value, str) else value
+
+
+class PasswordInput(BaseModel):
+    current_password: str = Field(min_length=1, max_length=64)
+    new_password: str = Field(min_length=8, max_length=64)
+
+
 class ApiResponse(BaseModel):
     success: bool
     message: str
@@ -135,7 +149,7 @@ async def api_error_handler(request: Request, exc: ApiError):
 @app.exception_handler(RequestValidationError)
 async def validation_handler(request: Request, exc: RequestValidationError):
     # 입력 원문(특히 비밀번호)을 응답이나 로그에 포함하지 않습니다.
-    return failure(400, '입력값을 확인해 주세요. 닉네임 2~20자, 비밀번호 8~64자 및 이메일 형식을 확인해 주세요.')
+    return failure(400, '입력값을 확인해 주세요. 닉네임은 2~20자, 새 비밀번호는 8~64자이며 이메일은 올바른 형식이어야 합니다.')
 
 
 @app.exception_handler(StarletteHTTPException)
@@ -201,8 +215,7 @@ def login(body: LoginInput, db: DB):
 security = HTTPBearer(auto_error=False)
 
 
-@app.get('/api/users/me', response_model=ApiResponse)
-def me(db: DB, credentials: Annotated[
+def get_current_user(db: DB, credentials: Annotated[
     HTTPAuthorizationCredentials | None, Depends(security)
 ]):
     if credentials is None:
@@ -221,4 +234,33 @@ def me(db: DB, credentials: Annotated[
     user = db.get(User, user_id)
     if user is None:
         raise ApiError(401, '회원 정보를 확인할 수 없습니다. 다시 로그인해 주세요.')
+    return user
+
+
+CurrentUser = Annotated[User, Depends(get_current_user)]
+
+
+@app.get('/api/users/me', response_model=ApiResponse)
+def me(user: CurrentUser):
     return ApiResponse(success=True, message='회원 정보를 조회했습니다.', data=user_data(user))
+
+
+# 7. 로그인한 본인의 닉네임만 수정
+@app.patch('/api/users/me', response_model=ApiResponse)
+def update_me(body: ProfileInput, db: DB, user: CurrentUser):
+    user.nickname = body.nickname
+    db.commit()
+    db.refresh(user)
+    return ApiResponse(success=True, message='닉네임을 변경했어요.', data=user_data(user))
+
+
+# 8. 현재 비밀번호 확인 후 새 비밀번호의 해시만 저장
+@app.patch('/api/users/me/password', response_model=ApiResponse)
+def change_password(body: PasswordInput, db: DB, user: CurrentUser):
+    if not password_hash.verify(body.current_password, user.password_hash):
+        raise ApiError(400, '현재 비밀번호가 올바르지 않아요.')
+    if body.current_password == body.new_password:
+        raise ApiError(400, '현재 비밀번호와 다른 새 비밀번호를 입력해 주세요.')
+    user.password_hash = password_hash.hash(body.new_password)
+    db.commit()
+    return ApiResponse(success=True, message='비밀번호를 변경했어요.')

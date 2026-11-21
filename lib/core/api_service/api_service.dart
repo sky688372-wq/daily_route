@@ -1,6 +1,8 @@
 // API 관련 요청 관리 클래스
 import 'package:daily_route/core/model/login/login_response.dart';
 import 'package:daily_route/core/model/sign_up/sign_up_response.dart';
+import 'package:daily_route/core/model/user/user_response.dart';
+import 'package:daily_route/core/util/token_storage.dart';
 import 'package:dio/dio.dart';
 
 class ApiService {
@@ -10,9 +12,7 @@ class ApiService {
       baseUrl: 'http://10.0.2.2:8000',
       connectTimeout: const Duration(seconds: 3),
       receiveTimeout: const Duration(seconds: 3),
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: {'Content-Type': 'application/json'},
     ),
   );
 
@@ -24,42 +24,26 @@ class ApiService {
     try {
       final response = await _dio.post(
         '/api/auth/login',
-        data: {
-          'email': email.trim(),
-          'password': password,
-        },
+        data: {'email': email.trim(), 'password': password},
       );
-
-      print('로그인 상태 코드: ${response.statusCode}');
-      print('로그인 모델 변환 시작');
 
       final result = LoginResponse.fromJson(
         Map<String, dynamic>.from(response.data),
       );
 
-      print('로그인 모델 변환 완료');
-      print('로그인 성공 여부: ${result.success}');
-
       return result;
     } on DioException catch (e) {
       final data = e.response?.data;
-
-      print('로그인 통신 오류 종류: ${e.type}');
-      print('로그인 상태 코드: ${e.response?.statusCode}');
 
       if (data is Map<String, dynamic>) {
         return LoginResponse.fromJson(data);
       }
 
       rethrow;
-    } catch (e, stackTrace) {
-      print('로그인 응답 처리 오류 종류: ${e.runtimeType}');
-      print('로그인 응답 처리 오류 위치:\n$stackTrace');
-
+    } catch (e) {
       rethrow;
     }
   }
-
 
   // 2. 회원 가입 요청 API
   static Future<SignUpResponse> trySignUp({
@@ -77,26 +61,81 @@ class ApiService {
         },
       );
 
-      print('회원가입 상태 코드: ${response.statusCode}');
-      print('회원가입 응답: ${response.data}');
-
-      return SignUpResponse.fromJson(
-        Map<String, dynamic>.from(response.data),
-      );
+      return SignUpResponse.fromJson(Map<String, dynamic>.from(response.data));
     } on DioException catch (e) {
       final data = e.response?.data;
 
       if (data is Map<String, dynamic>) {
-        print('회원가입 실패 상태 코드: ${e.response?.statusCode}');
-        print('회원가입 실패 응답: $data');
-
         return SignUpResponse.fromJson(data);
       } else {
-        print('회원가입 연결 또는 응답 오류: ${e.type}');
-        print('회원가입 오류 메시지: ${e.message}');
-
         rethrow;
       }
+    }
+  }
+
+  // 3. 로그인한 사용자 조회
+  // 반환 형태: Future<UserResponse> (data: LoginUser?)
+  static Future<UserResponse> getMyInfo() async {
+    return UserResponse.fromJson(await _userRequest('/api/users/me'));
+  }
+
+  // 4. 닉네임 수정
+  // 반환 형태: Future<UserResponse> (data: 변경된 LoginUser?)
+  static Future<UserResponse> updateMyInfo({required String nickname}) async {
+    return UserResponse.fromJson(
+      await _userRequest('/api/users/me', data: {'nickname': nickname.trim()}),
+    );
+  }
+
+  // 5. 비밀번호 변경
+  // 반환 형태: Future<SignUpResponse> (성공 여부와 안내, data: null)
+  static Future<SignUpResponse> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    return SignUpResponse.fromJson(
+      await _userRequest(
+        '/api/users/me/password',
+        data: {
+          'current_password': currentPassword,
+          'new_password': newPassword,
+        },
+      ),
+    );
+  }
+
+  // 6. 본인 정보 API 요청: 매 요청마다 보안 저장소에서 인증 정보 조회
+  // 반환 형태: Future<Map<String, dynamic>>
+  static Future<Map<String, dynamic>> _userRequest(
+    String path, {
+    Map<String, dynamic>? data,
+  }) async {
+    final token = await TokenStorage.getToken();
+    if (token == null || token.isEmpty) {
+      return {'success': false, 'message': '다시 로그인해 주세요.', 'data': null};
+    }
+
+    try {
+      final response = await _dio.request<dynamic>(
+        path,
+        data: data,
+        options: Options(
+          method: data == null ? 'GET' : 'PATCH',
+          headers: {'Authorization': 'Bearer $token'},
+        ),
+      );
+      return Map<String, dynamic>.from(response.data);
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        return {
+          'success': false,
+          'message': '로그인이 만료되었어요. 로그아웃한 뒤 다시 로그인해 주세요.',
+          'data': null,
+        };
+      }
+      final body = e.response?.data;
+      if (body is Map<String, dynamic>) return body;
+      rethrow;
     }
   }
 }
