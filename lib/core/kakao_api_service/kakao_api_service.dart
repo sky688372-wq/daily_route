@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:daily_route/core/model/kakao_response/address_search_response.dart';
 import 'package:daily_route/core/model/kakao_response/bicycle_route_response.dart';
 import 'package:daily_route/core/model/kakao_response/car_route_response.dart';
@@ -37,9 +35,7 @@ class KakaoApiService {
     final response = await _request(
       apiName: '주소 → 좌표 변환',
       url: 'https://dapi.kakao.com/v2/local/search/address.json',
-      queryParameters: {
-        'query': address.trim(),
-      },
+      queryParameters: {'query': address.trim()},
     );
 
     final data = response.data;
@@ -48,9 +44,7 @@ class KakaoApiService {
       throw const FormatException('주소 검색 응답이 JSON 객체가 아닙니다.');
     }
 
-    return AddressSearchResponse.fromJson(
-      Map<String, dynamic>.from(data),
-    );
+    return AddressSearchResponse.fromJson(Map<String, dynamic>.from(data));
   }
 
   // 2. 좌표로 주소를 변환하는 API
@@ -63,11 +57,7 @@ class KakaoApiService {
     final response = await _request(
       apiName: '좌표 → 주소 변환',
       url: 'https://dapi.kakao.com/v2/local/geo/coord2address.json',
-      queryParameters: {
-        'x': longitude,
-        'y': latitude,
-        'input_coord': 'WGS84',
-      },
+      queryParameters: {'x': longitude, 'y': latitude, 'input_coord': 'WGS84'},
     );
 
     final data = response.data;
@@ -118,9 +108,7 @@ class KakaoApiService {
       throw const FormatException('장소 검색 응답이 JSON 객체가 아닙니다.');
     }
 
-    return PlaceSearchResponse.fromJson(
-      Map<String, dynamic>.from(data),
-    );
+    return PlaceSearchResponse.fromJson(Map<String, dynamic>.from(data));
   }
 
   // 4. 도보 경로를 조회하는 API
@@ -151,9 +139,7 @@ class KakaoApiService {
       throw const FormatException('도보 경로 응답이 JSON 객체가 아닙니다.');
     }
 
-    return WalkingRouteResponse.fromJson(
-      Map<String, dynamic>.from(data),
-    );
+    return WalkingRouteResponse.fromJson(Map<String, dynamic>.from(data));
   }
 
   // 5. 자전거 경로를 조회하는 API
@@ -184,9 +170,7 @@ class KakaoApiService {
       throw const FormatException('자전거 경로 응답이 JSON 객체가 아닙니다.');
     }
 
-    return BicycleRouteResponse.fromJson(
-      Map<String, dynamic>.from(data),
-    );
+    return BicycleRouteResponse.fromJson(Map<String, dynamic>.from(data));
   }
 
   // 6. 대중교통 경로를 조회하는 API
@@ -217,9 +201,7 @@ class KakaoApiService {
       throw const FormatException('대중교통 경로 응답이 JSON 객체가 아닙니다.');
     }
 
-    return TransitRouteResponse.fromJson(
-      Map<String, dynamic>.from(data),
-    );
+    return TransitRouteResponse.fromJson(Map<String, dynamic>.from(data));
   }
 
   // 7. 자동차 경로를 조회하는 API
@@ -250,14 +232,12 @@ class KakaoApiService {
       throw const FormatException('자동차 경로 응답이 JSON 객체가 아닙니다.');
     }
 
-    return CarRouteResponse.fromJson(
-      Map<String, dynamic>.from(data),
-    );
+    return CarRouteResponse.fromJson(Map<String, dynamic>.from(data));
   }
 
   // 8. 공통 API 요청
   // 반환 형태: Future<Response<dynamic>>
-  // 원본 응답을 반환하며, 디버그 모드에서는 상태 코드와 응답을 출력
+  // 원본 응답을 반환하며, 디버그 모드에서는 상태 코드만 출력
   static Future<Response<dynamic>> _request({
     required String apiName,
     required String url,
@@ -274,15 +254,11 @@ class KakaoApiService {
         url,
         queryParameters: queryParameters,
         options: Options(
-          headers: {
-            'Authorization': 'KakaoAK ${_restApiKey.trim()}',
-          },
+          headers: {'Authorization': 'KakaoAK ${_restApiKey.trim()}'},
         ),
       );
 
       _log('[$apiName] HTTP 상태 코드: ${response.statusCode}');
-      _log('[$apiName] 응답 JSON:');
-      _printResponse(response.data);
 
       return response;
     } on DioException catch (e) {
@@ -290,10 +266,7 @@ class KakaoApiService {
       _log('[$apiName] 오류 종류: ${e.type.name}');
       _log('[$apiName] HTTP 상태 코드: ${e.response?.statusCode}');
 
-      if (e.response != null) {
-        _log('[$apiName] 서버 오류 응답:');
-        _printResponse(e.response?.data);
-      } else {
+      if (e.response == null) {
         _log('[$apiName] 서버 응답을 받지 못했습니다.');
       }
 
@@ -304,23 +277,8 @@ class KakaoApiService {
     }
   }
 
-  // 9. 응답을 보기 좋게 출력
-  static void _printResponse(dynamic data) {
-    if (!kDebugMode) return;
-
-    if (data == null) {
-      _log('응답 본문이 없습니다.');
-      return;
-    }
-
-    if (data is Map || data is List) {
-      _log(const JsonEncoder.withIndent('  ').convert(data));
-    } else {
-      _log(data.toString());
-    }
-  }
-
-  // 10. 디버그 모드에서만 로그 출력
+  // 9. 디버그 모드에서만 안전한 상태 로그 출력
+  // 반환 형태: void
   static void _log(String message) {
     if (!kDebugMode) return;
 

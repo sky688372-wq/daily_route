@@ -3,6 +3,8 @@ import importlib.util
 import os
 from pathlib import Path
 import unittest
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, select

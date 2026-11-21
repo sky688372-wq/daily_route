@@ -1,4 +1,4 @@
-# 데일리루트 인증 백엔드
+# 데일리루트 로컬 백엔드
 
 Python 3.11 이상 / MySQL 8 이상. FastAPI + SQLAlchemy + MySQL.
 
@@ -15,7 +15,7 @@ Python 3.11 이상 / MySQL 8 이상. FastAPI + SQLAlchemy + MySQL.
 이전 논의에서 제안했던 닉네임 2~20자, 중복 허용 / 가입 비밀번호 8~64자를 기본값으로 구현했습니다.
 닉네임 앞뒤 공백 제거. 이메일 앞뒤 공백 제거 및 전체 소문자 통일, DB UNIQUE 제약 적용.
 비밀번호는 공백을 제거하지 않고 Argon2로 해시 저장. 비밀번호 확인은 Flutter에서 검사.
-회원 테이블 users만 구현했습니다. 프로젝트 전체의 10개 이상 테이블 조건은 아직 충족하지 않습니다.
+회원(users), 모의 호출(ride_requests), 상태 이력(ride_status_history) 테이블을 구현했습니다. 프로젝트 전체의 10개 이상 테이블 조건은 아직 충족하지 않습니다.
 
 ## 1. MySQL 준비
 MySQL 관리 도구(예: Workbench)에서 setup.sql을 열고 비밀번호를 변경한 뒤 실행하세요.
@@ -104,3 +104,13 @@ created_at은 UTC입니다. 비밀번호 원문은 저장하지 않습니다.
 ### 마이페이지 API 회귀 검사
 
 별도 테스트 환경에서 `pip install -r requirements-dev.txt` 후 `python -m unittest discover -s tests -v`를 실행합니다. 테스트는 임시 SQLite DB를 사용하며 실제 MySQL에 접속하지 않습니다.
+
+
+## 모의 호출 및 이용내역
+
+- 서버 재시작 시 `ride_requests`, `ride_status_history` 테이블을 추가 생성합니다. 기존 회원 테이블과 데이터는 유지합니다.
+- `POST /api/rides`: 호출 당시 장소·일정·이동 지원 사항·차량 참고 시간을 저장합니다. 같은 사용자의 같은 client_request_id(UUID)는 한 번만 등록합니다.
+- `GET /api/rides`: 본인의 최근 100건과 상태 변경 이력을 조회합니다.
+- `PATCH /api/rides/{id}/status`: 접수 → 모의 운행 중 → 완료 또는 접수/모의 운행 중 → 취소만 허용합니다. 완료·취소 후에는 변경할 수 없습니다.
+- 실제 배차 서비스와 연결되지 않습니다. 요금이나 실제 도착 시각을 확정하지 않습니다.
+- `python -m unittest discover -s tests -v`로 SQLite 회귀 검사를 실행할 수 있습니다.

@@ -1,3 +1,7 @@
+import 'package:daily_route/core/providers/current_location_controller.dart';
+import 'package:daily_route/screen/main/home/home_trip_controller.dart';
+import 'package:daily_route/core/model/kakao_response/place_search_response.dart';
+import 'package:daily_route/screen/main/call/call_screen.dart';
 import 'package:daily_route/core/model/login/login_data.dart';
 import 'package:daily_route/core/providers/user_provider.dart';
 import 'package:daily_route/screen/main/my/detail/change_password_screen.dart';
@@ -97,5 +101,45 @@ void main() {
     expect(deletedToken, isTrue);
     expect(find.byType(MyScreen), findsNothing);
     expect(tester.takeException(), isNull);
+  });
+  testWidgets('호출 준비에서 공유된 출발지·목적지를 표시하고 이용내역으로 이동한다', (tester) async {
+    final trip = HomeTripController();
+    trip.selectPlace(
+      KakaoPlace.fromJson({
+        'id': 'one',
+        'place_name': '공유 출발지',
+        'x': '126.97',
+        'y': '37.56',
+      }),
+      isOrigin: true,
+    );
+    trip.selectPlace(
+      KakaoPlace.fromJson({
+        'id': 'two',
+        'place_name': '공유 목적지',
+        'x': '126.98',
+        'y': '37.57',
+      }),
+      isOrigin: false,
+    );
+    await show(
+      tester,
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider.value(value: trip),
+          ChangeNotifierProvider(create: (_) => CurrentLocationController()),
+        ],
+        child: const CallScreen(),
+      ),
+    );
+    expect(find.text('공유 출발지'), findsOneWidget);
+    expect(find.text('공유 목적지'), findsOneWidget);
+    expect(find.text('학습용 모의 호출이에요. 실제 차량은 배차되지 않아요.'), findsOneWidget);
+    await tester.tap(find.text('이용내역'));
+    await tester.pumpAndSettle();
+    expect(find.text('내 이용내역'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox());
+    trip.dispose();
   });
 }

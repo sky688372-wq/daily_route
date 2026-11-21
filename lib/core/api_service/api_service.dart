@@ -9,7 +9,11 @@ class ApiService {
   // dio 객체 생성
   static final Dio _dio = Dio(
     BaseOptions(
-      baseUrl: 'http://10.0.2.2:8000',
+      // 에뮬레이터 기본값 유지. USB 실기기는 실행 스크립트에서 주소 지정
+      baseUrl: const String.fromEnvironment(
+        'API_BASE_URL',
+        defaultValue: 'http://10.0.2.2:8000',
+      ),
       connectTimeout: const Duration(seconds: 3),
       receiveTimeout: const Duration(seconds: 3),
       headers: {'Content-Type': 'application/json'},
@@ -110,6 +114,20 @@ class ApiService {
     String path, {
     Map<String, dynamic>? data,
   }) async {
+    return authenticatedRequest(
+      path,
+      method: data == null ? 'GET' : 'PATCH',
+      data: data,
+    );
+  }
+
+  // 7. 인증이 필요한 API 공통 요청
+  // 반환 형태: Future<Map<String, dynamic>>
+  static Future<Map<String, dynamic>> authenticatedRequest(
+    String path, {
+    String method = 'GET',
+    Map<String, dynamic>? data,
+  }) async {
     final token = await TokenStorage.getToken();
     if (token == null || token.isEmpty) {
       return {'success': false, 'message': '다시 로그인해 주세요.', 'data': null};
@@ -120,7 +138,7 @@ class ApiService {
         path,
         data: data,
         options: Options(
-          method: data == null ? 'GET' : 'PATCH',
+          method: method,
           headers: {'Authorization': 'Bearer $token'},
         ),
       );

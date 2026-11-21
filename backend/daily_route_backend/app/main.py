@@ -1,3 +1,5 @@
+from app.db_base import Base
+from app.ride_api import create_ride_router
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
 from typing import Annotated
@@ -14,7 +16,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from pwdlib import PasswordHash
 from sqlalchemy import DateTime, String, URL, create_engine, select
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
-from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, sessionmaker
+from sqlalchemy.orm import Mapped, Session, mapped_column, sessionmaker
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 
@@ -50,10 +52,6 @@ DUMMY_HASH = password_hash.hash('dummy-password-not-used-for-login')
 
 
 # 2. 회원 테이블
-class Base(DeclarativeBase):
-    pass
-
-
 class User(Base):
     __tablename__ = 'users'
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
@@ -149,6 +147,8 @@ async def api_error_handler(request: Request, exc: ApiError):
 @app.exception_handler(RequestValidationError)
 async def validation_handler(request: Request, exc: RequestValidationError):
     # 입력 원문(특히 비밀번호)을 응답이나 로그에 포함하지 않습니다.
+    if request.url.path.startswith('/api/rides'):
+        return failure(400, '출발지·목적지, 이동 일정과 지원 사항을 확인해 주세요.')
     return failure(400, '입력값을 확인해 주세요. 닉네임은 2~20자, 새 비밀번호는 8~64자이며 이메일은 올바른 형식이어야 합니다.')
 
 
@@ -264,3 +264,7 @@ def change_password(body: PasswordInput, db: DB, user: CurrentUser):
     user.password_hash = password_hash.hash(body.new_password)
     db.commit()
     return ApiResponse(success=True, message='비밀번호를 변경했어요.')
+
+
+# 9. 본인 모의 호출 및 상태 이력 API
+app.include_router(create_ride_router(get_db, get_current_user, ApiResponse, ApiError))

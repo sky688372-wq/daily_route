@@ -1,6 +1,11 @@
+import 'package:daily_route/core/providers/current_location_controller.dart';
+import 'package:daily_route/screen/main/home/home_trip_controller.dart';
+import 'package:provider/provider.dart';
 import 'package:daily_route/core/theme/app_color.dart';
 import 'package:daily_route/screen/main/home/home_screen.dart';
+import 'package:daily_route/screen/main/call/call_screen.dart';
 import 'package:daily_route/screen/main/my/my_screen.dart';
+import 'package:daily_route/screen/main/widgets/main_bottom_navigation_bar.dart';
 import 'package:flutter/material.dart';
 
 class MainScreen extends StatefulWidget {
@@ -13,75 +18,48 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   // 현재 선택된 탭 인덱스
   int _currentIndex = 0;
+  final _trip = HomeTripController();
+  final _location = CurrentLocationController();
+
+  @override
+  void dispose() {
+    _trip.dispose();
+    _location.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColor.background,
-      body: SafeArea(
-        child: IndexedStack(
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider.value(value: _trip),
+        ChangeNotifierProvider.value(value: _location),
+      ],
+      child: Scaffold(
+        backgroundColor: AppColor.background,
+        extendBody: _currentIndex == 0,
+        body: IndexedStack(
           index: _currentIndex,
-          children: const [
+          children: [
             // 1. 홈 화면
-            HomeScreen(),
+            HomeScreen(onPrepareCall: () => setState(() => _currentIndex = 1)),
 
-            // 2. 호출 화면
-            // todo: 호출 화면 구현 후 교체
-            Center(child: Text('호출 화면')),
+            // 2. 호출 화면 (호출 준비·이용내역)
+            const CallScreen(),
 
-            // 3. 이용내역 화면
-            // todo: 이용내역 화면 구현 후 교체
-            Center(child: Text('이용내역 화면')),
-
-            // 4. 내 정보 화면
-            MyScreen()
+            // 3. 내 정보 화면
+            const MyScreen(),
           ],
         ),
-      ),
 
-      // 5. 바텀 네비게이션 바
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: AppColor.background,
-        selectedItemColor: AppColor.primary,
-        unselectedItemColor: AppColor.textSecondary,
-        selectedFontSize: 12,
-        unselectedFontSize: 12,
-        items: const [
-          // 홈
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            activeIcon: Icon(Icons.home),
-            label: '홈',
-          ),
-
-          // 호출
-          BottomNavigationBarItem(
-            icon: Icon(Icons.local_taxi_outlined),
-            activeIcon: Icon(Icons.local_taxi),
-            label: '호출',
-          ),
-
-          // 이용내역
-          BottomNavigationBarItem(
-            icon: Icon(Icons.receipt_long_outlined),
-            activeIcon: Icon(Icons.receipt_long),
-            label: '이용내역',
-          ),
-
-          // 내 정보
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            activeIcon: Icon(Icons.person),
-            label: '내 정보',
-          ),
-        ],
+        // 4. 캡슐 모양의 플로팅 바텀 네비게이션 바
+        bottomNavigationBar: MainBottomNavigationBar(
+          translucent: _currentIndex == 0,
+          currentIndex: _currentIndex,
+          onTap: (index) {
+            setState(() => _currentIndex = index);
+          },
+        ),
       ),
     );
   }
